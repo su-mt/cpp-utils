@@ -89,6 +89,6 @@ int main(int argc, char** argv) {
     int uniqueLines = DeleteRepeatsData().deleteRepeatsDats(data, out);
     cout << "In file " << argv[2] << " successfully wrote " << uniqueLines << " unique lines" << endl;
 
-    return 0;
 
+    return 0;
 }
