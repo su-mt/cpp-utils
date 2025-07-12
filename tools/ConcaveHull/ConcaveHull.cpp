@@ -301,7 +301,7 @@ inline void removeCandidate(std::vector<Point>& G, size_t idx) {
 }
 
 
-std::list<Point> ConcaveHull:: __getconcavehull() {
+std::list<Point> ConcaveHull::__getconcavehull() {
     std::list<Point> conHull(H.begin(), H.end());
     EdgeQueue edgesq(conHull);
 
@@ -315,33 +315,47 @@ std::list<Point> ConcaveHull:: __getconcavehull() {
         size_t Gsize = G.size();
         int bestIdx = -1;
         double globalMinS = std::numeric_limits<double>::infinity();
+        std::mutex mutex;
 
-        #pragma omp parallel
-        {
-            double localMinS = std::numeric_limits<double>::infinity();
-            int localBest = -1;
+        const unsigned numThreads = std::thread::hardware_concurrency();
+        std::vector<std::thread> threads;
 
-            #pragma omp for schedule(dynamic,64) nowait
-            for (int i = 0; i < static_cast<int>(Gsize); ++i) {
-                const Point& pt = G[i];
-                double d1 = geom::dist(pt, pb);
-                double d2 = geom::dist(pe, pt);
-                if (d1 + d2 - qd > gamma * std::min(d1, d2)) continue;
+        for (unsigned t = 0; t < numThreads; ++t) {
+            threads.emplace_back([&, t]() {
+                size_t chunkSize = (Gsize + numThreads - 1) / numThreads;
+                size_t startIdx = t * chunkSize;
+                size_t endIdx = std::min(Gsize, startIdx + chunkSize);
 
-                double S = geom::triangleSquare(pb, pt, pe);
-                if (S >= localMinS) continue;
+                double localMinS = std::numeric_limits<double>::infinity();
+                int localBest = -1;
 
-                if (geom::isCrossHull(pb_it, pt, conHull)) continue;
+                for (size_t i = startIdx; i < endIdx; ++i) {
+                    const Point& pt = G[i];
+                    double d1 = geom::dist(pt, pb);
+                    double d2 = geom::dist(pe, pt);
+                    if (d1 + d2 - qd > gamma * std::min(d1, d2)) continue;
 
-                localMinS = S;
-                localBest = i;
-            }
+                    double S = geom::triangleSquare(pb, pt, pe);
+                    if (S >= localMinS) continue;
 
-            #pragma omp critical
-            if (localBest >= 0 && localMinS < globalMinS) {
-                globalMinS = localMinS;
-                bestIdx = localBest;
-            }
+                    if (geom::isCrossHull(pb_it, pt, conHull)) continue;
+
+                    localMinS = S;
+                    localBest = static_cast<int>(i);
+                }
+
+                if (localBest >= 0) {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    if (localMinS < globalMinS) {
+                        globalMinS = localMinS;
+                        bestIdx = localBest;
+                    }
+                }
+            });
+        }
+
+        for (auto& th : threads) {
+            th.join();
         }
 
         if (bestIdx < 0)
@@ -355,6 +369,7 @@ std::list<Point> ConcaveHull:: __getconcavehull() {
     }
 
     conhull = conHull;
+    cout << conHull.size() << endl;
     return conHull;
 }
 
