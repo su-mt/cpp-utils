@@ -6,6 +6,7 @@
 #include <list>
 #include <set>
 
+#define FORCE
 
 using namespace std;
 
@@ -366,6 +367,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    #ifndef FORCE
+
     constexpr int wait_seconds = 5;
     if (filesystem::exists(argv[2])) {
         cout << "Warning: file \"" << argv[2] << "\" already exists and will be overwritten!" << endl;
@@ -373,6 +376,7 @@ int main(int argc, char** argv)
         this_thread::sleep_for(std::chrono::seconds(wait_seconds));
 
     }
+    #endif
 
     ofstream out(argv[2], ios::binary);
     if (!out) {
@@ -392,5 +396,7 @@ int main(int argc, char** argv)
     for (const auto& pt : cnh) {
         out << pt.x << ' ' << pt.y << '\n';
     }
+    auto pt = cnh.front();
+    out << pt.x << ' ' << pt.y << '\n';
     return 0;
 }
