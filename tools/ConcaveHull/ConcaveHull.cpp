@@ -273,69 +273,98 @@ list<Point> minConvexHull::getG() const {
 
 // ===== ConcaveHull =====
 
-ConcaveHull::ConcaveHull(const vector<Point>& points, double g)
-    : P(points), gamma(g) {
-    minConvexHull convex(points);
-    H = convex.getH();
-    G = convex.getG();
+ConcaveHull::ConcaveHull(const std::vector<Point>& points, double g)
+    : H(minConvexHull(points).getH()), gamma(g) {
+    std::unordered_set<Point, hashPoint> hullSet(H.begin(), H.end());
+    G.reserve(points.size() - H.size());
+    for (const auto& p : points) {
+        if (hullSet.find(p) == hullSet.end())
+            G.push_back(p);
+    }
     nH = H.size();
 }
 
-ConcaveHull::ConcaveHull(const minConvexHull& convex)
-    : H(convex.getH()), G(convex.getG()), nH(H.size()) {}
+ConcaveHull::ConcaveHull(const std::vector<Point>& points)
+    : H(minConvexHull(points).getH()) {
+    std::unordered_set<Point, hashPoint> hullSet(H.begin(), H.end());
+    G.reserve(points.size() - H.size());
+    for (const auto& p : points) {
+        if (hullSet.find(p) == hullSet.end())
+            G.push_back(p);
+    }
+    nH = H.size();
+}
 
-list<Point> ConcaveHull::__getconcavehull() {
-    list<Point> conHull(H.begin(), H.end());
+inline void removeCandidate(std::vector<Point>& G, size_t idx) {
+    G[idx] = G.back();
+    G.pop_back();
+}
+
+
+std::list<Point> ConcaveHull:: __getconcavehull() {
+    std::list<Point> conHull(H.begin(), H.end());
     EdgeQueue edgesq(conHull);
 
-    int ix = 0;
-    while (true && !edgesq.empty()) {
-        cout << G.size() << " " <<conHull.size() << " "<< ix <<"\n";
-        ix++;
+    while (true) {
         Edge edge = edgesq.getMaxEdge();
-        auto pb = edge.prev;
-        auto pe = edge.next;
-        double qd = edge.length;
-        double minS = numeric_limits<double>::infinity();
+        auto pb_it = edge.prev;
+        auto pe_it = edge.next;
+        Point pb = *pb_it, pe = *pe_it;
+        double qd = geom::dist(pb, pe);
 
+        size_t Gsize = G.size();
+        int bestIdx = -1;
+        double globalMinS = std::numeric_limits<double>::infinity();
 
-        
+        #pragma omp parallel
+        {
+            double localMinS = std::numeric_limits<double>::infinity();
+            int localBest = -1;
 
-        auto insertG = G.end();
-        for (auto it = G.begin(); it != G.end(); ++it) {
-            Point pt = *it;
-            float qd1 = geom::distSq(pt, *pb);
-            float qd2 = geom::distSq(*pe, pt);
+            #pragma omp for schedule(dynamic,64) nowait
+            for (int i = 0; i < static_cast<int>(Gsize); ++i) {
+                const Point& pt = G[i];
+                double d1 = geom::dist(pt, pb);
+                double d2 = geom::dist(pe, pt);
+                if (d1 + d2 - qd > gamma * std::min(d1, d2)) continue;
 
-            if (qd1 + qd2 - qd > gamma * min(qd1, qd2)) continue;
+                double S = geom::triangleSquare(pb, pt, pe);
+                if (S >= localMinS) continue;
 
-            double St = geom::triangleSquare(*pb, pt, *pe);
+                if (geom::isCrossHull(pb_it, pt, conHull)) continue;
 
-            if (St < minS && !geom::isCrossHull(pb, pt, conHull)) {
-                insertG = it;
-                minS = St;
+                localMinS = S;
+                localBest = i;
+            }
+
+            #pragma omp critical
+            if (localBest >= 0 && localMinS < globalMinS) {
+                globalMinS = localMinS;
+                bestIdx = localBest;
             }
         }
 
-        if (insertG != G.end()) {
-            auto ptNew = conHull.insert(next(pb), *insertG);
-            edgesq.splitEdge(ptNew);
-            G.erase(insertG);
-        } else {
+        if (bestIdx < 0)
             break;
 
-        }
+        auto insertPos = std::next(pb_it);
+        auto newIt = conHull.insert(insertPos, G[bestIdx]);
+        edgesq.splitEdge(newIt);
+
+        removeCandidate(G, bestIdx);
     }
 
     conhull = conHull;
     return conHull;
 }
 
-list<Point> ConcaveHull::getConcaveHull() {
+
+
+std::list<Point> ConcaveHull::getConcaveHull() {
     return __getconcavehull();
 }
 
-list<Point> ConcaveHull::getConcaveHull(double g) {
+std::list<Point> ConcaveHull::getConcaveHull(double g) {
     gamma = g;
     return __getconcavehull();
 }
