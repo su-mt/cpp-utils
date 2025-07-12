@@ -296,7 +296,8 @@ list<Point> ConcaveHull::__getconcavehull() {
         auto pb = edge.prev;
         auto pe = edge.next;
         double qd = edge.length;
-        double minS = 4 * qd;
+        double minS = numeric_limits<double>::infinity();
+
 
         
 
