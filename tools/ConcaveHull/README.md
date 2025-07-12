@@ -4,6 +4,14 @@
 
 ## Сборка
 
+### Через CMake (рекомендуется)
+```sh
+cmake -S . -B build
+cmake --build build
+```
+Исполняемый файл появится в папке `build` с именем `conh`.
+
+### Одной командой (без CMake)
 ```sh
 clang++ -std=c++20 -O2 -g ConcaveHull.cpp -o conh
 ```
