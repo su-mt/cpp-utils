@@ -215,9 +215,15 @@ class minConvexHull {
                 ymin = i;
         }
         swap(p[0], p[ymin]);
-        geom::p0 = p[0];
+        
 
-        sort(p.begin() + 1, p.end(), geom::compare);
+        Point p0 = p[0];
+        sort(p.begin() + 1, p.end(), [p0](const Point& a, const Point& b) {
+            int o = geom::orientation(p0, a, b);
+            if (o == 0)
+                return geom::distSq(p0, a) < geom::distSq(p0, b);
+            return (o == 2);
+        });
 
         vector<Point> filtered;
         filtered.push_back(p[0]);
