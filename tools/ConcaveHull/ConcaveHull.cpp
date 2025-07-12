@@ -1,12 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
-#include <unordered_set>
-#include <vector>
-#include <list>
-#include <set>
 
-#define FORCE
+#include "ConcaveHull.hpp"
+
+#define FORCEWRITE
 
 using namespace std;
 
@@ -367,8 +365,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    #ifndef FORCE
-
+    #ifdef FORCEWRITE
+    #if FORCEWRITE 1
     constexpr int wait_seconds = 5;
     if (filesystem::exists(argv[2])) {
         cout << "Warning: file \"" << argv[2] << "\" already exists and will be overwritten!" << endl;
@@ -376,6 +374,7 @@ int main(int argc, char** argv)
         this_thread::sleep_for(std::chrono::seconds(wait_seconds));
 
     }
+    #endif
     #endif
 
     ofstream out(argv[2], ios::binary);
