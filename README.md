@@ -1,10 +1,10 @@
 # cpp-utils
 A collection of small and useful С and C++ utilities, tools, and code snippets for various tasks and experiments.
 
-## Оглавление
+## Table of Contents
 
-- [study/](./study/) — учебные проекты и эксперименты
-  - [parallel_sorting/](./study/parallel_sorting/) — параллельные алгоритмы сортировки и их тестирование
-- [tools/](./tools/) — различные утилиты и инструменты
-  - [ConcaveHull/](./tools/ConcaveHull/) — построение вогнутой оболочки, работа с точками и визуализация
-  - [DeleteRepeatsData/](./tools/DeleteRepeatsData/) — удаление повторяющихся данных из файлов
+- [study/](./study/) — study projects and experiments
+  - [parallel_sorting/](./study/parallel_sorting/) — parallel sorting algorithms and their benchmarking
+- [tools/](./tools/) — various utilities and tools
+  - [ConcaveHull/](./tools/ConcaveHull/) — concave hull construction, working with points, and visualization
+  - [DeleteRepeatsData/](./tools/DeleteRepeatsData/) — removing duplicate data from files
