@@ -14,7 +14,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
     bool forceOverwrite = false;
-    double gamma = 1500.0;
+    double gamma = 1.55;
     const char* inputPath = nullptr;
     const char* outputPath = nullptr;
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
         cerr << "Usage: " << argv[0] << " [options] <input_file> <output_file>\n"
              << "Options:\n"
              << "  -f, --force            Overwrite output file without warning\n"
-             << "  -g, --gamma <value>    Set gamma value for ConcaveHull (default: 1500.0)\n";
+             << "  -g, --gamma <value>    Set gamma value for ConcaveHull (default: 1.55)\n";
         return 1;
     }
 
