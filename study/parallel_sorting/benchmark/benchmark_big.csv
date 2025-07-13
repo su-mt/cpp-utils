@@ -1,0 +1,2 @@
+command,mean,stddev,median,user,system,min,max
+./sort -m -s big.txt out_m_big.txt,495.3219429662,0,495.3219429662,1928.9910201799999,268.66700538,495.3219429662,495.3219429662
