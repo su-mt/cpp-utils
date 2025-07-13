@@ -1,6 +1,6 @@
 #include <string>
 
-#include "sorting.hpp"
+#include "mergeSorting.hpp"
 
 using namespace std;
 
