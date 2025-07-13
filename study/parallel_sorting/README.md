@@ -1,4 +1,3 @@
-# Parallel External Merge Sort
 
 ## Описание
 
@@ -8,53 +7,85 @@
 
 ---
 
+
 ## Использование
 
-1. **Генерация тестовых данных:**
+### 1. Генерация тестовых данных
 
-   Для генерации файла с 1 000 000 случайных строк используйте Python-скрипт:
+В проекте есть три Python-скрипта для генерации файлов с разными типами данных:
 
-   ```bash
-   python3 generate_strings.py
-   ```
-   
-   Будет создан файл `file.txt`.
+- **generate_strings.py** — генерирует 1 000 000 случайных строк (от 5 до 15 символов):
+  ```bash
+  python3 generate_strings.py
+  # создаст file.txt
+  ```
+- **generate_ints.py** — генерирует 1 000 000 случайных целых чисел:
+  ```bash
+  python3 generate_ints.py
+  # создаст ints.txt
+  ```
+- **generate_floats.py** — генерирует 1 000 000 случайных float:
+  ```bash
+  python3 generate_floats.py
+  # создаст floats.txt
+  ```
 
-2. **Сборка проекта:**
+Параметры (количество, диапазон) можно изменить в соответствующих скриптах.
 
-   ```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
-   ```
+### 2. Сборка проекта
 
-3. **Запуск сортировки:**
+Для сборки используйте CMake:
 
-   ```bash
-   ./parallel_sorting file.txt
-   ```
-   
-   (Параметры запуска могут отличаться, см. исходный код `main.cpp`)
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
+
+```bash
+cmake -S . -B build
+cmake --build build
+```
+
+Будет создан исполняемый файл `sort`.
+
+
+### 3. Запуск сортировки
+
+Использование:
+
+```bash
+./sort [ -q | --quick | -m | --merge ] [ -a | --ascending | -d | --descending ] [ -i | --int | -f | --float | -s | --string ] <input_file> <output_file>
+```
+
+**Параметры:**
+- `-q`, `--quick` — быстрая сортировка (QuickSort)
+- `-m`, `--merge` — сортировка слиянием (MergeSort)
+- `-a`, `--ascending` — по возрастанию (по умолчанию)
+- `-d`, `--descending` — по убыванию
+- `-i`, `--int` — сортировать целые числа
+- `-f`, `--float` — сортировать числа с плавающей точкой
+- `-s`, `--string` — сортировать строки
+- `<input_file>` — путь к входному файлу
+- `<output_file>` — путь к выходному файлу
+
+**Примеры:**
+
+Сортировка целых чисел по возрастанию слиянием:
+```bash
+./sort -m -a -i ints.txt sorted_ints.txt
+```
+
+Сортировка строк по убыванию быстрой сортировкой:
+```bash
+./sort --quick --descending --string file.txt sorted_strings.txt
+```
 
 ---
 
-## Пример Python-кода для генерации строк
+---
 
-```python
-import random
-import string
-
-def generate_random_strings(filename: str, count: int = 10**6, min_len: int = 5, max_len: int = 15):
-    with open(filename, 'w') as f:
-        for _ in range(count):
-            length = random.randint(min_len, max_len)
-            rand_str = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-            f.write(rand_str + '\n')
-
-if __name__ == "__main__":
-    generate_random_strings("file.txt")
-```
 
 ---
 
