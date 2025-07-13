@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
 
     int totalChunks = splitIntoChunks(filename);
 
-    sortAllChunks<string>(filename, totalChunks);
-    mergeChunksToFile<string>(filename, totalChunks, argv[3]);
+    sortAllChunks<string>(filename, totalChunks, greater<string>{});
+    mergeChunksToFile<string>(filename, totalChunks, argv[2], greater<string> {});
 
 
 
