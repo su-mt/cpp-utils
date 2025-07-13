@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "mergeSorting.hpp"
-#include "quickSort.hpp"
+#include "include/mergeSorting.hpp"
+#include "include/quickSort.hpp"
 
 
 
@@ -68,14 +68,21 @@ int main(int argc, char** argv) {
             ofstream out(outputFile);
             for (auto x : data) out << x << '\n';
         } else if (type == "float") {
-            vector<float> data;
-            ifstream in(inputFile);
+            std::vector<float> data;
+            std::ifstream in(inputFile);
             float v;
             while (in >> v) data.push_back(v);
-            if (order == "ascending") quickSort<float>(data, 0, data.size() - 1);
-            else quickSort<float>(data, 0, data.size() - 1, greater<float>());
-            ofstream out(outputFile);
-            for (auto x : data) out << x << '\n';
+            if (order == "ascending")
+                quickSort<float>(data, 0, data.size() - 1);
+            else
+                quickSort<float>(data, 0, data.size() - 1, std::greater<float>());
+            
+            std::ofstream out(outputFile);
+            // Включаем фиксированный формат и максимальную точность для float
+            out << std::fixed
+                << std::setprecision(std::numeric_limits<float>::max_digits10);
+            for (auto x : data)
+                out << x << '\n';
         } else {
             vector<string> data;
             ifstream in(inputFile);
