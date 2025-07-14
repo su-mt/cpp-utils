@@ -8,11 +8,11 @@ def read_points(filename):
 def draw(points, hull):
     plt.figure(figsize=(8, 8))
 
-    # Все точки — синие маленькие кружки
-    px, py = zip(*points)
-    plt.scatter(px, py, color='blue', s=10, label='Points')  # s=10 — маленький размер маркера
 
-    # Выпуклая оболочка — красная линия
+    px, py = zip(*points)
+    plt.scatter(px, py, color='blue', s=10, label='Points') 
+
+
     if len(hull) >= 2:
         hx, hy = zip(*hull)
         plt.plot(hx, hy, color='red', linewidth=1.5, label='Convex Hull')
