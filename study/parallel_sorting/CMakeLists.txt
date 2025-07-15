@@ -3,8 +3,8 @@ project(parallel_sorting)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Добавьте все исходные файлы, которые нужны для сборки
 add_executable(sort
     src/main.cpp
     src/ThreadPool.cpp
@@ -12,6 +12,5 @@ add_executable(sort
 
 target_include_directories(sort PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-set_target_properties(sort PROPERTIES
-    COMPILE_OPTIONS "-g;-O3"
-)
+# Оптимизации и отладочная информация
+target_compile_options(sort PRIVATE -O3 -g -Wall -Wextra)
