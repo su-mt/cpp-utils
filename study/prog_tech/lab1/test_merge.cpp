@@ -5,16 +5,13 @@ int main() {
     std::cout << "=== Тестирование слияния очередей ===" << std::endl;
     
     try {
-        // Создаем две очереди
         QueuePublic queue1, queue2;
         
-        // Добавляем элементы в первую очередь
         std::cout << "Добавляем в первую очередь: 1, 2, 3" << std::endl;
         queue1.add(1);
         queue1.add(2);
         queue1.add(3);
         
-        // Добавляем элементы во вторую очередь
         std::cout << "Добавляем во вторую очередь: 4, 5, 6" << std::endl;
         queue2.add(4);
         queue2.add(5);
@@ -26,7 +23,6 @@ int main() {
         std::cout << "Вторая очередь:" << std::endl;
         queue2.show();
         
-        // Тестируем слияние
         std::cout << "\nСливаем очереди..." << std::endl;
         QueuePublic mergedQueue = QueuePublic::merge(queue1, queue2);
         
