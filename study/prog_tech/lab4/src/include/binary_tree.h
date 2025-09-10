@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <queue>
+#include <cstring>
+#include <cstring>
 
 
 template<typename T>
@@ -293,6 +295,43 @@ TreeNode<T>* BinaryTree<T>::copy_tree(TreeNode<T>* node) {
     new_node->left = copy_tree(node->left);
     new_node->right = copy_tree(node->right);
     return new_node;
+}
+
+// Специализации для char*
+template<>
+TreeNode<char*>* BinaryTree<char*>::insert_recursive(TreeNode<char*>* node, char* const& value) {
+    if (node == nullptr) {
+        return new TreeNode<char*>(value);
+    }
+    
+    int cmp = strcmp(node->data, value);
+    if (cmp > 0) {
+        node->right = insert_recursive(node->right, value);
+    }
+    else if (cmp < 0) {
+        node->left = insert_recursive(node->left, value);
+    }
+    
+    return node;
+}
+
+template<>
+bool BinaryTree<char*>::search_recursive(TreeNode<char*>* node, char* const& value) const {
+    if (node == nullptr) {
+        return false;
+    }
+    
+    int cmp = strcmp(value, node->data);
+    if (cmp == 0) {
+        return true;
+    }
+    
+    if (strcmp(node->data, value) > 0) {
+        return search_recursive(node->right, value);
+    }
+    else {
+        return search_recursive(node->left, value);
+    }
 }
 
 #endif // BINARY_TREE_H
