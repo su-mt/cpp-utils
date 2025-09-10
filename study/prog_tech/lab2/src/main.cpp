@@ -423,7 +423,7 @@ int main() {
                 testLongNumber();
                 break;
             case 0:
-                std::cout << "Выход из программы. До свидания!" << std::endl;
+                std::cout << "Выход из программы." << std::endl;
                 break;
             default:
                 std::cout << "Неверная опция! Попробуйте снова." << std::endl;
