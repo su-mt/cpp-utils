@@ -12,7 +12,7 @@ private:
 	Node* head;
 	Node* tail;
 	int count;
-	int userStep;  // пользовательское значение для операторов ++ и --
+	int userStep;
 
 public:
 	Queue();
@@ -28,19 +28,16 @@ public:
 	void clear();
 	void init(int n);
 	void initRandom(int n, int minVal = 0, int maxVal = 100);
-	void setUserStep(int step);  // установка пользовательского значения
-	int getUserStep() const;     // получение пользовательского значения
+	void setUserStep(int step);
+	int getUserStep() const;
 
-	// Перегруженные операторы
-	Queue& operator++();           // префиксная форма ++q
-	Queue& operator--();           // префиксная форма --q
+	Queue& operator++();
+	Queue& operator--();
 	
-	// Дружественные функции для постфиксных операторов
-	friend Queue operator++(Queue& q, int);  // постфиксная форма q++
-	friend Queue operator--(Queue& q, int);  // постфиксная форма q--
+	friend Queue operator++(Queue& q, int);
+	friend Queue operator--(Queue& q, int);
 
 private:
-	// Вспомогательные методы для операторов
 	int getMin() const;
 	int getMax() const;
 

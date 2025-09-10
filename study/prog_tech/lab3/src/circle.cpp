@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 Circle::Circle() : radius(1.0) {
-    // Конструктор по умолчанию создает круг с радиусом 1
 }
 
 Circle::Circle(double r) : radius(r) {
@@ -13,7 +12,6 @@ Circle::Circle(double r) : radius(r) {
 }
 
 Circle::Circle(const Circle& other) : radius(other.radius) {
-    // Конструктор копирования
 }
 
 Circle& Circle::operator=(const Circle& other) {
@@ -24,7 +22,6 @@ Circle& Circle::operator=(const Circle& other) {
 }
 
 Circle::~Circle() {
-    // Виртуальный деструктор
 }
 
 double Circle::getRadius() const {

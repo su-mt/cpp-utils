@@ -5,7 +5,7 @@
 #include <ctime>
 
 Queue::Queue() : head(nullptr), tail(nullptr), count(0), userStep(1) {
-	// Инициализируем генератор случайных чисел
+    
 	static bool initialized = false;
 	if (!initialized) {
 		srand(static_cast<unsigned int>(time(nullptr)));
@@ -117,7 +117,7 @@ int Queue::getUserStep() const {
 // Префиксная форма ++ (метод) - увеличивает размер очереди на userStep элементов
 Queue& Queue::operator++() {
 	for (int i = 0; i < userStep; ++i) {
-		int randomValue = 1 + rand() % 100; // случайные числа от 1 до 100
+	int randomValue = 1 + rand() % 100;
 		add(randomValue);
 	}
 	return *this;
@@ -125,7 +125,7 @@ Queue& Queue::operator++() {
 
 // Постфиксная форма ++ (дружественная функция) - увеличивает все данные на минимальное число
 Queue operator++(Queue& q, int) {
-	Queue temp = q;  // сохраняем копию для возврата
+	Queue temp = q;
 	if (!q.empty()) {
 		int minVal = q.getMin();
 		Queue::Node* current = q.head;
@@ -147,7 +147,7 @@ Queue& Queue::operator--() {
 
 // Постфиксная форма -- (дружественная функция) - уменьшает все данные на максимальное число
 Queue operator--(Queue& q, int) {
-	Queue temp = q;  // сохраняем копию для возврата
+	Queue temp = q;
 	if (!q.empty()) {
 		int maxVal = q.getMax();
 		Queue::Node* current = q.head;

@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 Rectangle::Rectangle() : width(1.0), height(1.0) {
-    // Конструктор по умолчанию создает квадрат 1x1
 }
 
 Rectangle::Rectangle(double w, double h) : width(w), height(h) {
@@ -13,7 +12,6 @@ Rectangle::Rectangle(double w, double h) : width(w), height(h) {
 }
 
 Rectangle::Rectangle(const Rectangle& other) : width(other.width), height(other.height) {
-    // Конструктор копирования
 }
 
 Rectangle& Rectangle::operator=(const Rectangle& other) {
@@ -25,7 +23,6 @@ Rectangle& Rectangle::operator=(const Rectangle& other) {
 }
 
 Rectangle::~Rectangle() {
-    // Виртуальный деструктор
 }
 
 double Rectangle::getWidth() const {

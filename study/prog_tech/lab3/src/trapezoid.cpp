@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 Trapezoid::Trapezoid() : base1(1.0), base2(2.0), height(1.0), side1(1.5), side2(1.5) {
-    // Конструктор по умолчанию создает простую трапецию
+
 }
 
 Trapezoid::Trapezoid(double b1, double b2, double h, double s1, double s2) 
@@ -16,7 +16,7 @@ Trapezoid::Trapezoid(double b1, double b2, double h, double s1, double s2)
 Trapezoid::Trapezoid(const Trapezoid& other) 
     : base1(other.base1), base2(other.base2), height(other.height), 
       side1(other.side1), side2(other.side2) {
-    // Конструктор копирования
+
 }
 
 Trapezoid& Trapezoid::operator=(const Trapezoid& other) {
@@ -31,7 +31,7 @@ Trapezoid& Trapezoid::operator=(const Trapezoid& other) {
 }
 
 Trapezoid::~Trapezoid() {
-    // Виртуальный деструктор
+
 }
 
 double Trapezoid::getBase1() const {
