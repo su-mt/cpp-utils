@@ -11,12 +11,15 @@
 #include <string>
 
 
+
 class Menu {
 private:
     std::vector<std::unique_ptr<Figure>> figures;
     
     void showMainMenu() const;
+
     
+
     void addFigure();
 
     void createCircle();
@@ -24,9 +27,9 @@ private:
     void createRectangle();
     
     void createTrapezoid();
-    
+
     void createTriangle();
-    
+
     void showAllFigures() const;
     
     void showFigure();

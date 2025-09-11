@@ -9,6 +9,7 @@ struct Node {
     Node(int value) : data(value), next(nullptr) {}
 };
 
+
 class Queue {
 protected:
     Node* head;
@@ -31,3 +32,4 @@ public:
 };
 
 #endif
+

@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 
+
 std::vector<int> current_int_array;
 std::vector<char> current_char_array;
 std::vector<float> current_float_array;
@@ -150,7 +151,7 @@ void handle_tree_operations(BinaryTree<T>& tree, const std::string& type_name) {
     } while (choice != 0);
 }
 
-// Специализация для char*
+
 template<>
 void handle_tree_operations<char*>(BinaryTree<char*>& tree, const std::string& type_name) {
     int choice;
@@ -165,7 +166,7 @@ void handle_tree_operations<char*>(BinaryTree<char*>& tree, const std::string& t
                 std::cout << "Введите строку (" << type_name << ") для добавления: ";
                 std::cin >> value;
                 
-                // Создаем копию для дерева
+
                 char* tree_value = new char[strlen(value) + 1];
                 strcpy(tree_value, value);
                 
@@ -242,7 +243,7 @@ void handle_tree_operations<char*>(BinaryTree<char*>& tree, const std::string& t
     } while (choice != 0);
 }
 
-// Специализация для char
+
 template<>
 void handle_tree_operations<char>(BinaryTree<char>& tree, const std::string& type_name) {
     int choice;

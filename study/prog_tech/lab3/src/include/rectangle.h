@@ -19,7 +19,7 @@ public:
     
     Rectangle& operator=(const Rectangle& other);
     
-    virtual ~Rectangle();
+    virtual ~Rectangle() ;
     
     double getWidth() const;
     

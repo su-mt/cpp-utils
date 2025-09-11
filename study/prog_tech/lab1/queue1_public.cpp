@@ -11,6 +11,7 @@ QueuePublic& QueuePublic::operator=(const QueuePublic& other) {
 }
 QueuePublic::~QueuePublic() {}
 
+
 double QueuePublic::getHarmonicMean() {
     if (empty()) throw std::runtime_error("Очередь пуста!");
     double sum = 0.0;
