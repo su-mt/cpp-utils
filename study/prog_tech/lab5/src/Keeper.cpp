@@ -1,6 +1,9 @@
 #include "include/Keeper.h"
+#include "include/json.hpp"
 #include <iostream>
 #include <algorithm>
+
+using json = nlohmann::json;
 
 // Конструктор
 Keeper::Keeper() {}
@@ -73,20 +76,53 @@ bool Keeper::isEmpty() const {
 
 // Методы для работы с файлами
 bool Keeper::saveToFile(const std::string& filename) const {
+    json j = json::array();
+    
+    for (const auto& item : items) {
+        json obj;
+        std::string type = item->getType();
+        obj["type"] = type;
+        
+        if (type == "BOOK") {
+            const Book* book = dynamic_cast<const Book*>(item.get());
+            obj["title"] = book->getTitle();
+            obj["author"] = book->getAuthor();
+            obj["year"] = book->getYear();
+            obj["annotation"] = book->getAnnotation();
+            obj["genre"] = book->getGenre();
+            obj["pages"] = book->getPages();
+            obj["cost"] = book->getCost();
+        }
+        else if (type == "TEXTBOOK") {
+            const Textbook* textbook = dynamic_cast<const Textbook*>(item.get());
+            obj["title"] = textbook->getTitle();
+            obj["author"] = textbook->getAuthor();
+            obj["year"] = textbook->getYear();
+            obj["institution"] = textbook->getInstitution();
+            obj["studyYear"] = textbook->getStudyYear();
+            obj["pages"] = textbook->getPages();
+            obj["cost"] = textbook->getCost();
+        }
+        else if (type == "STATIONERY") {
+            const Stationery* stationery = dynamic_cast<const Stationery*>(item.get());
+            obj["stationeryType"] = stationery->getStationeryType();
+            obj["color"] = stationery->getColor();
+            obj["purpose"] = stationery->getPurpose();
+            obj["cost"] = stationery->getCost();
+        }
+        
+        j.push_back(obj);
+    }
+    
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cout << "Ошибка: не удалось открыть файл " << filename << " для записи." << std::endl;
         return false;
     }
     
-    file << items.size() << std::endl; // записываем количество элементов
-    
-    for (const auto& item : items) {
-        item->saveToFile(file);
-    }
-    
+    file << j.dump(4); // форматированный вывод с отступом 4
     file.close();
-    std::cout << "Данные успешно сохранены в файл " << filename << std::endl;
+    std::cout << "Данные успешно сохранены в файл " << filename << " в формате JSON." << std::endl;
     return true;
 }
 
@@ -99,27 +135,46 @@ bool Keeper::loadFromFile(const std::string& filename) {
     
     items.clear(); // очищаем текущие данные
     
-    size_t count;
-    file >> count;
-    file.ignore(); // игнорируем символ новой строки
+    json j;
+    try {
+        file >> j;
+    } catch (json::parse_error& e) {
+        std::cout << "Ошибка парсинга JSON: " << e.what() << std::endl;
+        file.close();
+        return false;
+    }
     
-    for (size_t i = 0; i < count; ++i) {
-        std::string type;
-        std::getline(file, type);
+    for (const auto& obj : j) {
+        std::string type = obj["type"];
         
         if (type == "BOOK") {
             auto book = std::make_unique<Book>();
-            book->loadFromFile(file);
+            book->setTitle(obj["title"]);
+            book->setAuthor(obj["author"]);
+            book->setYear(obj["year"]);
+            book->setAnnotation(obj["annotation"]);
+            book->setGenre(obj["genre"]);
+            book->setPages(obj["pages"]);
+            book->setCost(obj["cost"]);
             items.push_back(std::move(book));
         }
         else if (type == "TEXTBOOK") {
             auto textbook = std::make_unique<Textbook>();
-            textbook->loadFromFile(file);
+            textbook->setTitle(obj["title"]);
+            textbook->setAuthor(obj["author"]);
+            textbook->setYear(obj["year"]);
+            textbook->setInstitution(obj["institution"]);
+            textbook->setStudyYear(obj["studyYear"]);
+            textbook->setPages(obj["pages"]);
+            textbook->setCost(obj["cost"]);
             items.push_back(std::move(textbook));
         }
         else if (type == "STATIONERY") {
             auto stationery = std::make_unique<Stationery>();
-            stationery->loadFromFile(file);
+            stationery->setStationeryType(obj["stationeryType"]);
+            stationery->setColor(obj["color"]);
+            stationery->setPurpose(obj["purpose"]);
+            stationery->setCost(obj["cost"]);
             items.push_back(std::move(stationery));
         }
         else {
