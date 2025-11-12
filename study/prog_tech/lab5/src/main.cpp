@@ -1,10 +1,32 @@
 #include "include/Keeper.h"
 #include <iostream>
 #include <limits>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 void clearInputStream() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+
+std::string generateFilenameWithTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    auto tm = *std::localtime(&time);
+    
+    std::ostringstream oss;
+    oss << "bookstore_" 
+        << std::put_time(&tm, "%Y-%m-%d_%H%M%S")
+        << ".json";
+    return oss.str();
+}
+
+
+void autoSaveKeeper(const Keeper& keeper) {
+    std::string filename = generateFilenameWithTimestamp();
+    keeper.saveToFile(filename);
 }
 
 void showMenu() {
@@ -27,24 +49,91 @@ void addBookInteractive(Keeper& keeper) {
     std::cout << "\n=== ДОБАВЛЕНИЕ КНИГИ ===" << std::endl;
     Book book;
     std::cin >> book;
+    
+    
+    if (book.getTitle().empty() || book.getAuthor().empty()) {
+        std::cout << "ОШИБКА: Название и автор книги не могут быть пустыми!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (book.getYear() <= 0 || book.getYear() > 2100) {
+        std::cout << "ОШИБКА: Год выпуска должен быть между 1 и 2100!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (book.getPages() <= 0) {
+        std::cout << "ОШИБКА: Количество страниц должно быть положительным числом!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (book.getCost() < 0) {
+        std::cout << "ОШИБКА: Стоимость не может быть отрицательной!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    
     keeper.addBook(book);
     std::cout << "Книга успешно добавлена!" << std::endl;
+    autoSaveKeeper(keeper);
 }
 
 void addTextbookInteractive(Keeper& keeper) {
     std::cout << "\n=== ДОБАВЛЕНИЕ УЧЕБНИКА ===" << std::endl;
     Textbook textbook;
     std::cin >> textbook;
+    
+    
+    if (textbook.getTitle().empty() || textbook.getAuthor().empty()) {
+        std::cout << "ОШИБКА: Название и автор учебника не могут быть пустыми!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (textbook.getYear() <= 0 || textbook.getYear() > 2100) {
+        std::cout << "ОШИБКА: Год выпуска должен быть между 1 и 2100!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (textbook.getStudyYear() <= 0 || textbook.getStudyYear() > 8) {
+        std::cout << "ОШИБКА: Год обучения должен быть от 1 до 8!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (textbook.getPages() <= 0) {
+        std::cout << "ОШИБКА: Количество страниц должно быть положительным числом!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (textbook.getCost() < 0) {
+        std::cout << "ОШИБКА: Стоимость не может быть отрицательной!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    
     keeper.addTextbook(textbook);
     std::cout << "Учебник успешно добавлен!" << std::endl;
+    autoSaveKeeper(keeper);
 }
 
 void addStationeryInteractive(Keeper& keeper) {
     std::cout << "\n=== ДОБАВЛЕНИЕ КАНЦЕЛЯРИИ ===" << std::endl;
     Stationery stationery;
     std::cin >> stationery;
+    
+    
+    if (stationery.getStationeryType().empty()) {
+        std::cout << "ОШИБКА: Тип канцелярии не может быть пустым!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    if (stationery.getCost() < 0) {
+        std::cout << "ОШИБКА: Стоимость не может быть отрицательной!" << std::endl;
+        clearInputStream();
+        return;
+    }
+    
     keeper.addStationery(stationery);
     std::cout << "Канцелярия успешно добавлена!" << std::endl;
+    autoSaveKeeper(keeper);
 }
 
 void showByType(const Keeper& keeper) {
@@ -85,16 +174,28 @@ void removeByIndex(Keeper& keeper) {
 }
 
 void saveToFileInteractive(const Keeper& keeper) {
-    std::cout << "Введите имя файла для сохранения: ";
+    std::cout << "Введите имя файла (или нажмите Enter для автоматического имени с датой): ";
     std::string filename;
-    std::cin >> filename;
+    std::getline(std::cin, filename);
+    
+    if (filename.empty()) {
+        filename = generateFilenameWithTimestamp();
+        std::cout << "Используется автоматическое имя: " << filename << std::endl;
+    }
+    
     keeper.saveToFile(filename);
 }
 
 void loadFromFileInteractive(Keeper& keeper) {
     std::cout << "Введите имя файла для загрузки: ";
     std::string filename;
-    std::cin >> filename;
+    std::getline(std::cin, filename);
+    
+    if (filename.empty()) {
+        std::cout << "Ошибка: имя файла не может быть пустым!" << std::endl;
+        return;
+    }
+    
     keeper.loadFromFile(filename);
 }
 
@@ -103,7 +204,7 @@ void showContainerInfo(const Keeper& keeper) {
     std::cout << "Количество товаров: " << keeper.getSize() << std::endl;
     std::cout << "Статус: " << (keeper.isEmpty() ? "пустой" : "содержит данные") << std::endl;
     
-    // Подсчет по типам
+    
     auto books = keeper.findByType("BOOK");
     auto textbooks = keeper.findByType("TEXTBOOK");
     auto stationery = keeper.findByType("STATIONERY");
@@ -113,63 +214,12 @@ void showContainerInfo(const Keeper& keeper) {
     std::cout << "Канцелярии: " << stationery.size() << std::endl;
 }
 
-void demonstrateFeatures() {
-    std::cout << "=== ДЕМОНСТРАЦИЯ ВОЗМОЖНОСТЕЙ СИСТЕМЫ ===" << std::endl;
-    
-    Keeper keeper;
-    
-    // Добавляем тестовые данные
-    std::cout << "\nДобавляем тестовые данные..." << std::endl;
-    
-    Book book1("Война и мир", "Л.Н. Толстой", 1869, 
-               "Роман-эпопея о войне 1812 года", "Классика", 1300, 850.0);
-    keeper.addBook(book1);
-    
-    Textbook textbook1("Математический анализ", "В.А. Зорич", 2019, 
-                       "МГУ им. М.В. Ломоносова", 1, 680, 1200.0);
-    keeper.addTextbook(textbook1);
-    
-    Stationery stationery1("Ручка", "Синий", "Письмо", 25.0);
-    keeper.addStationery(stationery1);
-    
-    std::cout << "Тестовые данные добавлены." << std::endl;
-    
-    // Показываем все товары
-    std::cout << "\nВсе товары в магазине:" << std::endl;
-    keeper.displayAll();
-    
-    // Сохраняем в файл
-    std::cout << "\nСохраняем данные в файл 'test_data.txt'..." << std::endl;
-    keeper.saveToFile("test_data.txt");
-    
-    // Очищаем контейнер
-    std::cout << "\nОчищаем контейнер..." << std::endl;
-    keeper.removeAllItems();
-    
-    // Загружаем из файла
-    std::cout << "\nЗагружаем данные из файла..." << std::endl;
-    keeper.loadFromFile("test_data.txt");
-    
-    // Показываем загруженные данные
-    std::cout << "\nЗагруженные данные:" << std::endl;
-    keeper.displayAll();
-    
-    std::cout << "\nДемонстрация завершена. Переходим к интерактивному режиму." << std::endl;
-}
+
 
 int main() {
     std::cout << "Добро пожаловать в систему управления книжным магазином!" << std::endl;
     
-    char choice;
-    std::cout << "Запустить демонстрацию? (y/n): ";
-    std::cin >> choice;
-    clearInputStream();
-    
     Keeper keeper;
-    
-    if (choice == 'y' || choice == 'Y') {
-        demonstrateFeatures();
-    }
     
     int menuChoice;
     do {
@@ -209,10 +259,10 @@ int main() {
                 showContainerInfo(keeper);
                 break;
             case 0:
-                std::cout << "Спасибо за использование системы!" << std::endl;
+                
                 break;
             default:
-                std::cout << "Неверный выбор. Попробуйте снова." << std::endl;
+                std::cout << "Неверный выбор. " << std::endl;
         }
         
         if (menuChoice != 0) {

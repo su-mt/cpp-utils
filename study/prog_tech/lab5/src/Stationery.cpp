@@ -7,7 +7,7 @@ Stationery::Stationery(const std::string& type, const std::string& color,
                        const std::string& purpose, double cost) 
     : Base(cost), type(type), color(color), purpose(purpose) {}
 
-// Реализация чисто виртуальных методов
+
 void Stationery::display() const {
     std::cout << "=== КАНЦЕЛЯРИЯ ===" << std::endl;
     std::cout << "Тип: " << type << std::endl;
@@ -33,24 +33,24 @@ void Stationery::loadFromFile(std::ifstream& file) {
     std::getline(file, color);
     std::getline(file, purpose);
     file >> cost;
-    file.ignore(); // игнорируем символ новой строки
+    file.ignore(); 
 }
 
 std::string Stationery::getType() const {
     return "STATIONERY";
 }
 
-// Геттеры
+
 std::string Stationery::getStationeryType() const { return type; }
 std::string Stationery::getColor() const { return color; }
 std::string Stationery::getPurpose() const { return purpose; }
 
-// Сеттеры
+
 void Stationery::setStationeryType(const std::string& type) { this->type = type; }
 void Stationery::setColor(const std::string& color) { this->color = color; }
 void Stationery::setPurpose(const std::string& purpose) { this->purpose = purpose; }
 
-// Операторы ввода-вывода
+
 std::ostream& operator<<(std::ostream& os, const Stationery& stationery) {
     stationery.display();
     return os;
@@ -65,6 +65,6 @@ std::istream& operator>>(std::istream& is, Stationery& stationery) {
     std::getline(is, stationery.purpose);
     std::cout << "Введите стоимость: ";
     is >> stationery.cost;
-    is.ignore(); // игнорируем символ новой строки
+    is.ignore(); 
     return is;
 }

@@ -6,9 +6,7 @@
 #include <utility>
 #include <initializer_list>
 
-// Небольшая реализция шаблонного динамического массива my_vector
-// Поддерживает: default ctor, ctor(size), ctor(initializer_list),
-// push_back, pop_back, operator[], at, size, capacity, reserve, clear
+
 
 template<typename T>
 class my_vector {
@@ -137,6 +135,31 @@ public:
         for (std::size_t i = 0; i < size_; ++i) data_[i].~T();
         size_ = 0;
     }
+
+
+    void erase_at(std::size_t idx) {
+        if (idx >= size_) throw std::out_of_range("erase_at: index out of range");
+
+        for (std::size_t i = idx; i < size_ - 1; ++i) {
+            data_[i] = std::move(data_[i + 1]);
+        }
+        --size_;
+        data_[size_].~T();
+    }
+
+
+    std::size_t erase_index(std::size_t idx) {
+        erase_at(idx);
+        return idx;
+    }
+
+
+    T* begin() noexcept { return data_; }
+    T* end() noexcept { return data_ + size_; }
+    const T* begin() const noexcept { return data_; }
+    const T* end() const noexcept { return data_ + size_; }
+    const T* cbegin() const noexcept { return data_; }
+    const T* cend() const noexcept { return data_ + size_; }
 };
 
 #endif // MY_VECTOR_H

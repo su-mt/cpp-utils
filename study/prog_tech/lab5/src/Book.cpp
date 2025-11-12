@@ -1,6 +1,5 @@
 #include "include/Book.h"
 
-// Конструкторы
 Book::Book() : Base(), title(""), author(""), year(0), annotation(""), genre(""), pages(0) {}
 
 Book::Book(const std::string& title, const std::string& author, int year, 
@@ -9,7 +8,6 @@ Book::Book(const std::string& title, const std::string& author, int year,
     : Base(cost), title(title), author(author), year(year), 
       annotation(annotation), genre(genre), pages(pages) {}
 
-// Реализация чисто виртуальных методов
 void Book::display() const {
     std::cout << "=== КНИГА ===" << std::endl;
     std::cout << "Название: " << title << std::endl;
@@ -40,11 +38,11 @@ void Book::loadFromFile(std::ifstream& file) {
     std::getline(file, title);
     std::getline(file, author);
     file >> year;
-    file.ignore(); // игнорируем символ новой строки
+    file.ignore(); 
     std::getline(file, annotation);
     std::getline(file, genre);
     file >> pages >> cost;
-    file.ignore(); // игнорируем символ новой строки
+    file.ignore(); 
 }
 
 std::string Book::getType() const {
@@ -67,7 +65,7 @@ void Book::setAnnotation(const std::string& annotation) { this->annotation = ann
 void Book::setGenre(const std::string& genre) { this->genre = genre; }
 void Book::setPages(int pages) { this->pages = pages; }
 
-// Операторы ввода-вывода
+
 std::ostream& operator<<(std::ostream& os, const Book& book) {
     book.display();
     return os;
@@ -80,7 +78,7 @@ std::istream& operator>>(std::istream& is, Book& book) {
     std::getline(is, book.author);
     std::cout << "Введите год выпуска: ";
     is >> book.year;
-    is.ignore(); // игнорируем символ новой строки
+    is.ignore(); 
     std::cout << "Введите аннотацию: ";
     std::getline(is, book.annotation);
     std::cout << "Введите жанр: ";
@@ -89,6 +87,6 @@ std::istream& operator>>(std::istream& is, Book& book) {
     is >> book.pages;
     std::cout << "Введите стоимость: ";
     is >> book.cost;
-    is.ignore(); // игнорируем символ новой строки
+    is.ignore(); 
     return is;
 }

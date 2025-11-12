@@ -1,12 +1,12 @@
 
-CXX = g++
+CXX = clang++
 CXXFLAGS = -std=c++20 -Wall -Wextra -O2
 SRCDIR = src
 BUILDDIR = build
 TARGET = $(BUILDDIR)/bookstore
 SOURCES = $(SRCDIR)/main.cpp $(SRCDIR)/Base.cpp $(SRCDIR)/Book.cpp $(SRCDIR)/Textbook.cpp $(SRCDIR)/Stationery.cpp $(SRCDIR)/Keeper.cpp
 OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
-HEADERS = $(SRCDIR)/Base.h $(SRCDIR)/Book.h $(SRCDIR)/Textbook.h $(SRCDIR)/Stationery.h $(SRCDIR)/Keeper.h
+HEADERS = $(SRCDIR)/include/Base.h $(SRCDIR)/include/Book.h $(SRCDIR)/include/Textbook.h $(SRCDIR)/include/Stationery.h $(SRCDIR)/include/Keeper.h $(SRCDIR)/include/my_vector.h $(SRCDIR)/include/json.hpp
 
 
 all: $(BUILDDIR) $(TARGET)
@@ -31,5 +31,3 @@ clean:
 run: $(TARGET)
 	$(TARGET)
 
-
-.PHONY: all clean run debug deps

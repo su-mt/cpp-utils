@@ -5,10 +5,10 @@
 
 using json = nlohmann::json;
 
-// Конструктор
+
 Keeper::Keeper() {}
 
-// Методы для работы с объектами
+
 void Keeper::addItem(std::unique_ptr<Base> item) {
     if (item) {
         items.push_back(std::move(item));
@@ -32,7 +32,7 @@ bool Keeper::removeItem(size_t index) {
         std::cout << "Ошибка: неверный индекс " << index << std::endl;
         return false;
     }
-    items.erase(items.begin() + index);
+    items.erase_at(index);
     std::cout << "Элемент с индексом " << index << " удален." << std::endl;
     return true;
 }
@@ -42,7 +42,7 @@ void Keeper::removeAllItems() {
     std::cout << "Все элементы удалены из контейнера." << std::endl;
 }
 
-// Методы для отображения
+
 void Keeper::displayAll() const {
     if (items.empty()) {
         std::cout << "Контейнер пуст." << std::endl;
@@ -74,7 +74,7 @@ bool Keeper::isEmpty() const {
     return items.empty();
 }
 
-// Методы для работы с файлами
+
 bool Keeper::saveToFile(const std::string& filename) const {
     json j = json::array();
     
@@ -120,7 +120,7 @@ bool Keeper::saveToFile(const std::string& filename) const {
         return false;
     }
     
-    file << j.dump(4); // форматированный вывод с отступом 4
+    file << j.dump(4); 
     file.close();
     std::cout << "Данные успешно сохранены в файл " << filename << " в формате JSON." << std::endl;
     return true;
@@ -133,7 +133,7 @@ bool Keeper::loadFromFile(const std::string& filename) {
         return false;
     }
     
-    items.clear(); // очищаем текущие данные
+    items.clear(); 
     
     json j;
     try {
@@ -190,7 +190,7 @@ bool Keeper::loadFromFile(const std::string& filename) {
     return true;
 }
 
-// Поиск и фильтрация
+
 void Keeper::displayByType(const std::string& type) const {
     bool found = false;
     for (size_t i = 0; i < items.size(); ++i) {
@@ -210,8 +210,8 @@ void Keeper::displayByType(const std::string& type) const {
     }
 }
 
-std::vector<size_t> Keeper::findByType(const std::string& type) const {
-    std::vector<size_t> indices;
+my_vector<size_t> Keeper::findByType(const std::string& type) const {
+    my_vector<size_t> indices;
     for (size_t i = 0; i < items.size(); ++i) {
         if (items[i]->getType() == type) {
             indices.push_back(i);
@@ -220,7 +220,7 @@ std::vector<size_t> Keeper::findByType(const std::string& type) const {
     return indices;
 }
 
-// Операторы доступа
+
 Base* Keeper::operator[](size_t index) {
     if (index >= items.size()) {
         return nullptr;
@@ -235,7 +235,7 @@ const Base* Keeper::operator[](size_t index) const {
     return items[index].get();
 }
 
-// Операторы ввода-вывода
+
 std::ostream& operator<<(std::ostream& os, const Keeper& keeper) {
     keeper.displayAll();
     return os;

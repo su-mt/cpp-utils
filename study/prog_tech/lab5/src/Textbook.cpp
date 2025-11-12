@@ -1,6 +1,6 @@
 #include "include/Textbook.h"
 
-// Конструкторы
+
 Textbook::Textbook() : Base(), title(""), author(""), year(0), institution(""), studyYear(0), pages(0) {}
 
 Textbook::Textbook(const std::string& title, const std::string& author, int year, 
@@ -8,7 +8,7 @@ Textbook::Textbook(const std::string& title, const std::string& author, int year
     : Base(cost), title(title), author(author), year(year), 
       institution(institution), studyYear(studyYear), pages(pages) {}
 
-// Реализация чисто виртуальных методов
+
 void Textbook::display() const {
     std::cout << "=== УЧЕБНИК ===" << std::endl;
     std::cout << "Название: " << title << std::endl;
@@ -49,7 +49,7 @@ std::string Textbook::getType() const {
     return "TEXTBOOK";
 }
 
-// Геттеры
+
 std::string Textbook::getTitle() const { return title; }
 std::string Textbook::getAuthor() const { return author; }
 int Textbook::getYear() const { return year; }
@@ -57,7 +57,7 @@ std::string Textbook::getInstitution() const { return institution; }
 int Textbook::getStudyYear() const { return studyYear; }
 int Textbook::getPages() const { return pages; }
 
-// Сеттеры
+
 void Textbook::setTitle(const std::string& title) { this->title = title; }
 void Textbook::setAuthor(const std::string& author) { this->author = author; }
 void Textbook::setYear(int year) { this->year = year; }
@@ -65,7 +65,7 @@ void Textbook::setInstitution(const std::string& institution) { this->institutio
 void Textbook::setStudyYear(int studyYear) { this->studyYear = studyYear; }
 void Textbook::setPages(int pages) { this->pages = pages; }
 
-// Операторы ввода-вывода
+
 std::ostream& operator<<(std::ostream& os, const Textbook& textbook) {
     textbook.display();
     return os;
@@ -78,7 +78,7 @@ std::istream& operator>>(std::istream& is, Textbook& textbook) {
     std::getline(is, textbook.author);
     std::cout << "Введите год выпуска: ";
     is >> textbook.year;
-    is.ignore(); // игнорируем символ новой строки
+    is.ignore(); 
     std::cout << "Введите учебное заведение: ";
     std::getline(is, textbook.institution);
     std::cout << "Введите год обучения: ";
@@ -87,6 +87,6 @@ std::istream& operator>>(std::istream& is, Textbook& textbook) {
     is >> textbook.pages;
     std::cout << "Введите стоимость: ";
     is >> textbook.cost;
-    is.ignore(); // игнорируем символ новой строки
+    is.ignore(); 
     return is;
 }
