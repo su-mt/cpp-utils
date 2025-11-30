@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)  # включает LTO
+# Для ThinLTO в Clang
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_THIN TRUE)
+
 add_executable(sort
     src/main.cpp
     src/ThreadPool.cpp
@@ -13,4 +17,4 @@ add_executable(sort
 target_include_directories(sort PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Оптимизации и отладочная информация
-target_compile_options(sort PRIVATE -O3 -g -Wall -Wextra)
+target_compile_options(sort PRIVATE  -O3 -g -Wall -Wextra)
