@@ -2,17 +2,17 @@
 #include <iostream>
 #include <numeric>
 #include <cmath>
+#include <limits>
 
 using namespace STUDENT;
 
-// Вспомогательная функция для валидации оценки
 void Student::validateMark(int mark) const {
     if (mark < 1 || mark > 5) {
         throw InvalidMarkException(mark);
     }
 }
 
-// Конструктор
+
 Student::Student(const std::string& surname_initials, int group_number)
     : surname(surname_initials), group_number(group_number) {
     if (surname_initials.empty()) {
@@ -23,7 +23,7 @@ Student::Student(const std::string& surname_initials, int group_number)
     }
 }
 
-// Методы доступа (геттеры)
+
 std::string Student::getSurnameInitials() const {
     return surname;
 }
@@ -44,7 +44,7 @@ double Student::getAverageMark() const {
     return sum / marks.size();
 }
 
-// Методы изменения (сеттеры)
+
 void Student::setSurnameInitials(const std::string& surname_initials) {
     if (surname_initials.empty()) {
         throw EmptySurnameException();
@@ -74,14 +74,14 @@ void Student::addMark(int mark) {
     marks.push_back(mark);
 }
 
-// Операторы сравнения
+
 bool Student::operator<(const Student& other) const {
-    // Сравниваем по среднему баллу в порядке возрастания
+
     double avg1 = this->getAverageMark();
     double avg2 = other.getAverageMark();
     
     if (std::fabs(avg1 - avg2) < 1e-9) {
-        // Если средние баллы равны, сравниваем по фамилии
+
         return surname < other.surname;
     }
     return avg1 < avg2;
@@ -93,7 +93,7 @@ bool Student::operator==(const Student& other) const {
            marks == other.marks;
 }
 
-// Оператор вставки (вывод)
+
 std::ostream& STUDENT::operator<<(std::ostream& os, const Student& student) {
     os << "Фамилия и инициалы: " << student.surname << std::endl;
     os << "Номер группы: " << student.group_number << std::endl;
@@ -115,37 +115,53 @@ std::ostream& STUDENT::operator<<(std::ostream& os, const Student& student) {
     return os;
 }
 
-// Оператор извлечения (ввод)
+
 std::istream& STUDENT::operator>>(std::istream& is, Student& student) {
+    std::string input;
+    
     std::cout << "Введите фамилию и инициалы: ";
-    std::getline(is, student.surname);
+    if (!std::getline(is, input)) {
+        return is;
+    }
+    
+
+    size_t start = input.find_first_not_of(" \t\n\r");
+    size_t end = input.find_last_not_of(" \t\n\r");
+    
+    if (start != std::string::npos) {
+        student.surname = input.substr(start, end - start + 1);
+    } else {
+        student.surname.clear();
+    }
     
     if (student.surname.empty()) {
         throw EmptySurnameException();
     }
     
+
     std::cout << "Введите номер группы: ";
-    is >> student.group_number;
-    is.ignore();  // Игнорируем символ новой строки после числа
+    std::getline(is, input);
+    student.group_number = std::stoi(input);
     
     if (student.group_number <= 0) {
         throw InvalidGroupNumberException(student.group_number);
     }
     
+
     std::cout << "Введите количество оценок: ";
-    int count;
-    is >> count;
-    is.ignore();  // Игнорируем символ новой строки
+    std::getline(is, input);
+    int count = std::stoi(input);
     
     if (count <= 0) {
         throw EmptyMarksException();
     }
     
+
     student.marks.clear();
     for (int i = 0; i < count; ++i) {
         std::cout << "Оценка " << (i + 1) << ": ";
-        int mark;
-        is >> mark;
+        std::getline(is, input);
+        int mark = std::stoi(input);
         student.validateMark(mark);
         student.marks.push_back(mark);
     }
@@ -153,7 +169,7 @@ std::istream& STUDENT::operator>>(std::istream& is, Student& student) {
     return is;
 }
 
-// Реализация компаратора
+
 bool StudentComparator::operator()(const Student& a, const Student& b) const {
     return a < b;
 }

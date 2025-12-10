@@ -4,10 +4,67 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <limits>
+#include <string>
 
 using STUDENT::Student;
 using STUDENT::StudentComparator;
 using STUDENT::StudentException;
+using STUDENT::EmptySurnameException;
+using STUDENT::InvalidGroupNumberException;
+using STUDENT::EmptyMarksException;
+
+
+
+std::string trim(const std::string& str) {
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    if (start == std::string::npos) return "";
+    return str.substr(start, end - start + 1);
+}
+
+
+std::string readLine(const std::string& prompt) {
+    std::cout << prompt;
+    std::string input;
+    std::getline(std::cin, input);
+    return trim(input);
+}
+
+
+int readInt(const std::string& prompt) {
+    std::string input = readLine(prompt);
+    return std::stoi(input);
+}
+
+
+Student inputStudent() {
+
+    std::string surname = readLine("Введите фамилию и инициалы: ");
+    if (surname.empty()) {
+        throw EmptySurnameException();
+    }
+    
+
+    int groupNumber = readInt("Введите номер группы: ");
+    if (groupNumber <= 0) {
+        throw InvalidGroupNumberException(groupNumber);
+    }
+    
+    Student student(surname, groupNumber);
+    
+    int count = readInt("Введите количество оценок: ");
+    if (count <= 0) {
+        throw EmptyMarksException();
+    }
+    
+    for (int i = 0; i < count; ++i) {
+        int mark = readInt("Оценка " + std::to_string(i + 1) + ": ");
+        student.addMark(mark);
+    }
+    
+    return student;
+}
 
 int main() {
     std::set<Student, StudentComparator> students;
@@ -24,23 +81,28 @@ int main() {
             std::cout << "4. Выход" << std::endl;
             std::cout << "Выбор: ";
             
-            std::cin >> choice;
-            std::cin.ignore();  // Очищаем буфер
+            std::string choiceStr;
+            if (!std::getline(std::cin, choiceStr)) {
+                break; // Выход при EOF
+            }
+            
+            try {
+                choice = std::stoi(choiceStr);
+            } catch (...) {
+                choice = 0; // Неверный ввод
+            }
             
             if (choice == 1) {
-                // Добавление студента
                 try {
-                    Student student;
-                    std::cin >> student;
+                    Student student = inputStudent();
                     students.insert(student);
-                    std::cout << "✓ Студент добавлен успешно!" << std::endl;
+                    std::cout << "Студент добавлен успешно!" << std::endl;
                 } catch (const StudentException& e) {
-                    std::cerr << "\n❌ " << e.what() << std::endl;
+                    std::cerr << "\n" << e.what() << std::endl;
                     std::cout << "Пожалуйста, попробуйте снова." << std::endl;
                 }
                 
             } else if (choice == 2) {
-                // Вывод всех студентов
                 if (students.empty()) {
                     std::cout << "Нет студентов в базе данных." << std::endl;
                 } else {
@@ -52,14 +114,14 @@ int main() {
                 }
                 
             } else if (choice == 3) {
-                // Вывод студентов с оценками 4 и 5
+
                 std::vector<std::pair<std::string, int>> excellentStudents;
                 
                 for (const auto& student : students) {
                     const auto& marks = student.getMarks();
                     bool hasOnlyHighMarks = true;
                     
-                    // Проверяем, что все оценки >= 4
+
                     for (int mark : marks) {
                         if (mark < 4) {
                             hasOnlyHighMarks = false;
@@ -99,7 +161,7 @@ int main() {
                 std::cout << "Неверный выбор. Попробуйте снова." << std::endl;
             }
         } catch (const std::exception& e) {
-            std::cerr << "\n❌ Непредвиденная ошибка: " << e.what() << std::endl;
+            std::cerr << "\nНепредвиденная ошибка: " << e.what() << std::endl;
         }
     }
     
