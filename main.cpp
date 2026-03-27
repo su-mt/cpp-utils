@@ -21,18 +21,17 @@
 #include <algorithm>
 #include <string>
 
-// ─── Globals ────────────────────────────────────────────────────────────────
-// C-style atomic API lives in std:: namespace in C++ (<atomic> header).
+
 std::chrono::steady_clock::time_point program_start;
 atomic_int running;
 
-// ─── LogEntry ────────────────────────────────────────────────────────────────
+
 struct LogEntry {
     uint64_t timestamp_ms;
     std::string message;
 };
 
-// ─── SPSCQueue (unchanged) ───────────────────────────────────────────────────
+
 template<typename T>
 class SPSCQueue {
     struct Node {
@@ -67,16 +66,13 @@ public:
     }
 };
 
-// ─── log_event helper ────────────────────────────────────────────────────────
-// Called by every actor; timestamp is captured here, on the producer side.
+
 void log_event(SPSCQueue<LogEntry>* q, const std::string& msg) {
     auto now = std::chrono::steady_clock::now();
-    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      now - program_start).count();
+    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - program_start).count();
     q->push({ms, std::move(msg)});
 }
 
-// ─── CrossRoads (unchanged) ──────────────────────────────────────────────────
 class CrossRoads {
 public:
     pthread_mutex_t sectors[4];
@@ -88,11 +84,20 @@ public:
     }
 };
 
-// ─── Enums (unchanged) ───────────────────────────────────────────────────────
-enum class Direction { Right, Forward, Left, Turn };
-enum class Road      { East, North, West, South    };
 
-// ─── Car (unchanged) ─────────────────────────────────────────────────────────
+enum class Direction { 
+    Right, 
+    Forward,
+    Left,
+    Turn };
+
+enum class Road { 
+    East, 
+    North, 
+    West, 
+    South };
+
+
 class Car {
     unsigned id;
     Direction direction;
@@ -109,8 +114,8 @@ public:
 
     auto getRoute() const {
         std::vector<int> path;
-        int curr  = static_cast<int>(road) + 1;
-        int steps = static_cast<int>(direction) + 1;
+        int curr  = (static_cast<int>(road) + 1) % 4;
+        int steps = (static_cast<int>(direction) + 1);
         for (int i = 0; i < steps; i++) {
             path.push_back(curr);
             curr = (curr + 1) % 4;
@@ -118,7 +123,7 @@ public:
         return path;
     }
 
-    // Helper for readable log messages
+
     std::string describe() const {
         static const char* dirs[] = {"Right","Forward","Left","Turn"};
         static const char* rds[]  = {"East","North","West","South"};
@@ -131,23 +136,19 @@ public:
     }
 };
 
-// ─── Logger ──────────────────────────────────────────────────────────────────
-// Owns the log file. Reads all queues round-robin and writes directly.
-// On shutdown: does a final drain, then sorts the whole file by timestamp.
+
 class Logger {
     static constexpr int NUM_QUEUES = 6;
-    SPSCQueue<LogEntry>* queues;   // logs[0..5]
+    SPSCQueue<LogEntry>* queues;   
     std::string          filename;
     pthread_t            thread;
 
-    // Write one entry to the file
+
     static void write_entry(std::FILE* f, const LogEntry& e) {
-        std::fprintf(f, "[%08llu] %s\n",
-                     (unsigned long long)e.timestamp_ms,
-                     e.message.c_str());
+        std::fprintf(f, "[%08llu] %s\n", (unsigned long long)e.timestamp_ms, e.message.c_str());
     }
 
-    // Drain all queues to file; returns number of entries written
+
     int drain(std::FILE* f) {
         int count = 0;
         for (int i = 0; i < NUM_QUEUES; i++) {
@@ -159,7 +160,7 @@ class Logger {
         return count;
     }
 
-    // Re-read file, sort by timestamp, rewrite
+
     void sort_file() {
         std::ifstream in(filename);
         if (!in.is_open()) return;
@@ -169,7 +170,7 @@ class Logger {
         while (std::getline(in, line)) {
             if (line.empty()) continue;
             uint64_t ts = 0;
-            // format: [00012345] message
+
             if (line[0] == '[') {
                 auto end = line.find(']');
                 if (end != std::string::npos)
@@ -181,15 +182,13 @@ class Logger {
 
         std::stable_sort(lines.begin(), lines.end(),
                          [](const auto& a, const auto& b){
-                             return a.first < b.first;
-                         });
+                             return a.first < b.first;  });
 
         std::ofstream out(filename, std::ios::trunc);
         for (auto& [ts, l] : lines)
             out << l << '\n';
 
-        std::cout << "[Logger] File sorted. Total entries: "
-                  << lines.size() << '\n';
+        std::cout << "[Logger] File sorted. Total entries: "  << lines.size() << '\n';
     }
 
     void loop() {
@@ -202,11 +201,10 @@ class Logger {
         while (atomic_load(&running)) {
             drain(f);
             std::fflush(f);
-            // small sleep to avoid busy-spin when queues are empty
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        // Final drain — producers have already stopped
+
         drain(f);
         std::fflush(f);
         std::fclose(f);
@@ -220,8 +218,7 @@ class Logger {
     }
 
 public:
-    Logger(SPSCQueue<LogEntry>* qs, std::string fname = "crossroads.log")
-        : queues(qs), filename(std::move(fname)), thread(0) {}
+    Logger(SPSCQueue<LogEntry>* qs, std::string fname = "crossroads.log") : queues(qs), filename(std::move(fname)), thread(0) {}
 
     void start() {
         pthread_create(&thread, nullptr, start_routine, this);
@@ -231,14 +228,13 @@ public:
     }
 };
 
-// ─── Generator ───────────────────────────────────────────────────────────────
 class Generator {
     std::mt19937 mt;
     std::uniform_int_distribution<> speed_distrib;
     std::uniform_int_distribution<> distrib;
     unsigned id = 0;
     SPSCQueue<Car>*     queues;
-    SPSCQueue<LogEntry>* log_q;  // logs[0]
+    SPSCQueue<LogEntry>* log_q;  
 public:
     Generator(SPSCQueue<Car>* q, SPSCQueue<LogEntry>* lq,
               unsigned low = 1, unsigned up = 5)
@@ -261,7 +257,7 @@ public:
     void p() {
         while (atomic_load(&running)) {
             pushToQueue(createCar());
-            std::this_thread::sleep_for(std::chrono::seconds(10));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
@@ -271,7 +267,7 @@ public:
     }
 };
 
-// ─── Worker ───────────────────────────────────────────────────────────────────
+
 class Worker {
     struct WorkerArgs {
         Worker*             worker;
@@ -283,7 +279,7 @@ class Worker {
 
     pthread_t            thread;
     CrossRoads*          xroad;
-    SPSCQueue<LogEntry>* log_q;  // logs[2..5]
+    SPSCQueue<LogEntry>* log_q;  
 
     static void* start_routine(void* arg) {
         WorkerArgs* args = static_cast<WorkerArgs*>(arg);
@@ -299,19 +295,16 @@ class Worker {
             std::this_thread::sleep_for(std::chrono::seconds(car.getSpeed()));
         };
 
-        // First sector was already locked by tryProcess
+
         delay();
-        log_event(lq, "Car#" + std::to_string(car.getId())
-                      + " left sector " + std::to_string(route[0]));
         pthread_mutex_unlock(&xroad.sectors[route[0]]);
+        log_event(lq, "Car#" + std::to_string(car.getId())  + " left sector " + std::to_string(route[0]));
 
         for (int i = 1; i < (int)route.size(); i++) {
-            pthread_mutex_lock(&xroad.sectors[route[i]]);
-            log_event(lq, "Car#" + std::to_string(car.getId())
-                          + " entered sector " + std::to_string(route[i]));
+            if (i > 1) pthread_mutex_lock(&xroad.sectors[route[i]]);
+            log_event(lq, "Car#" + std::to_string(car.getId()) + " entered sector " + std::to_string(route[i]));
             delay();
-            log_event(lq, "Car#" + std::to_string(car.getId())
-                          + " left sector " + std::to_string(route[i]));
+            log_event(lq, "Car#" + std::to_string(car.getId())  + " left sector " + std::to_string(route[i]));
             pthread_mutex_unlock(&xroad.sectors[route[i]]);
         }
     }
@@ -330,7 +323,7 @@ public:
             if (pthread_mutex_trylock(&xroad->sectors[route[1]]) == 0) {
                 WorkerArgs* args = new WorkerArgs{this, route, car, xroad, log_q};
                 pthread_create(&thread, nullptr, start_routine, args);
-                pthread_mutex_unlock(&xroad->sectors[route[1]]);
+                //pthread_mutex_unlock(&xroad->sectors[route[1]]);
                 return true;
             } else {
                 pthread_mutex_unlock(&xroad->sectors[route[0]]);
@@ -344,7 +337,7 @@ public:
     }
 };
 
-// ─── Scheduler ───────────────────────────────────────────────────────────────
+
 class Scheduler {
     void handler(SPSCQueue<Car>* queues, Worker* workers, SPSCQueue<LogEntry>* log_q) {
 
@@ -353,7 +346,7 @@ class Scheduler {
             if (cand.has_value()) {
                 auto route = cand->getRoute();
 
-                // Build route string for log
+
                 std::ostringstream rs;
                 rs << "[";
                 for (int i = 0; i < (int)route.size(); i++) {
@@ -362,16 +355,13 @@ class Scheduler {
                 }
                 rs << "]";
 
-                log_event(log_q, "Car#" + std::to_string(cand->getId())
-                                 + " attempting route " + rs.str());
+                log_event(log_q, "Car#" + std::to_string(cand->getId()) + " attempting route " + rs.str());
 
                 if (workers[static_cast<int>(r)].tryProcess(route, cand.value())) {
-                    log_event(log_q, "Car#" + std::to_string(cand->getId())
-                                     + " accepted");
+                    log_event(log_q, "Car#" + std::to_string(cand->getId()) + " accepted");
                     queues[static_cast<int>(r)].pop();
                 } else {
-                    log_event(log_q, "Car#" + std::to_string(cand->getId())
-                                     + " rejected");
+                    log_event(log_q, "Car#" + std::to_string(cand->getId())  + " rejected");
                 }
             }
 
@@ -395,28 +385,24 @@ public:
     }
 };
 
-// ─── SIGINT handler ──────────────────────────────────────────────────────────
+
 void sigint_handler(int) {
     atomic_store(&running, 0);
 }
 
-// ─── main ────────────────────────────────────────────────────────────────────
-int main() {
-    // Init globals
+int main(int argc, char** argv) {
+
     program_start = std::chrono::steady_clock::now();
     atomic_init(&running, 1);
 
-    // Register SIGINT
+
     struct sigaction sa{};
     sa.sa_handler = sigint_handler;
     sigaction(SIGINT, &sa, nullptr);
 
-    // Queues
+
     SPSCQueue<Car>     queues[4];
     SPSCQueue<LogEntry> logs[6];
-    // logs[0] → Generator
-    // logs[1] → Scheduler
-    // logs[2..5] → Worker[0..3]
 
     CrossRoads xroad;
 
@@ -429,23 +415,21 @@ int main() {
 
     Generator gen(queues, &logs[0]);
 
-    Logger logger(logs);
+    Logger logger(logs, argv[1]);
     logger.start();
 
     pthread_t thread_generator, thread_sch;
     pthread_create(&thread_generator, nullptr, Generator::start_routine, &gen);
 
     Scheduler sch;
-    Scheduler::SchArgs* sch_args =
-        new Scheduler::SchArgs{&sch, queues, workers, &logs[1]};
+    Scheduler::SchArgs* sch_args = new Scheduler::SchArgs{&sch, queues, workers, &logs[1]};
     pthread_create(&thread_sch, nullptr, Scheduler::start_routine, sch_args);
 
-    // Wait for Ctrl+C → running = 0
+
     pthread_join(thread_generator, nullptr);
     pthread_join(thread_sch, nullptr);
     for (auto& w : workers) w.join();
 
-    // Logger last — guarantees all entries are flushed and sorted
     logger.join();
 
     std::cout << "[main] Done. See crossroads.log\n";
