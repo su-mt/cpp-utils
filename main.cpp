@@ -1,6 +1,8 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <optional>
 #include <pthread.h>
@@ -13,6 +15,16 @@
 #include <utility>
 #include <chrono>
 #include <vector>
+
+
+std::chrono::steady_clock::time_point program_start;
+std::atomic<int> running;
+
+struct LogEntry {
+    uint64_t timestamp_ms;
+    std::string message;
+};
+
 
 
 
@@ -77,12 +89,13 @@ public:
 };
  
 //dummy queue
+template<typename T>
 class SPSCQueue {  
     struct Node {
-        std::optional<Car> car;
+        std::optional<T> val;
         std::atomic<Node*> next;
-        Node () : car(std::nullopt), next(nullptr) { };
-        Node (Car car) : car(std::move (car)) ,next(nullptr) { };
+        Node () : val(std::nullopt), next(nullptr) { };
+        Node (T val) : val(std::move (val)) ,next(nullptr) { };
     };
 
     Node* tail_, *head_;
@@ -92,27 +105,27 @@ public:
         head_ = tail_ = dummy;
     }
 
-    void push (Car car) {
-        Node* node= new Node(std::move(car));
+    void push (T val) {
+        Node* node= new Node(std::move(val));
         tail_->next.store(node,std::memory_order_release);
         tail_=node;
     }
-    std::optional<Car> see() {
+    std::optional<T> see() {
         Node* next = head_->next.load(std::memory_order_acquire);
         if (next == nullptr) {
             return std::nullopt;  
         }
 
-        return next->car;                          
+        return next->val;                          
     }
 
-    Car pop () {
+    T pop () {
         Node* data = head_->next.load(std::memory_order_acquire);
         Node* old_head = head_;
-        Car car = std::move(data->car.value());
+        T val = std::move(data->val.value());
         head_ = data;
         delete old_head;
-        return car;
+        return val;
     }
 
 
@@ -124,9 +137,10 @@ class Generator {
     std::uniform_int_distribution<> speed_distrib;
     std::uniform_int_distribution<> distrib ;
     unsigned id = 0;
-    SPSCQueue* queues;
+    SPSCQueue<Car>* queues;
+	SPSCQueue<std::string> log;
 public:
-    Generator (SPSCQueue* q, unsigned low_speed_bound = 1,unsigned up_speed_bound = 5) : \
+    Generator (SPSCQueue<Car>* q, unsigned low_speed_bound = 1,unsigned up_speed_bound = 5) : \
      mt(std::random_device{}()), speed_distrib(low_speed_bound,up_speed_bound), \
      distrib(0,3), \
      queues (q) { }
@@ -144,7 +158,7 @@ public:
 
 
     void p () {
-		std::optional<Car> nc,ec,wc,sc;
+		//std::optional<Car> nc,ec,wc,sc;
 		for (;;) {
 
 			pushToQueue(createCar());
@@ -192,7 +206,7 @@ class Worker {
 
 
 public: //shuld be protected and friend with sch
-    Worker(CrossRoads* xr) : xroad(xr), worker(0) {}
+    Worker(CrossRoads* xr) : worker(0), xroad(xr)  {}
 
 
 	bool tryProcess (const std::vector<int>& route, const Car& car) {
@@ -222,7 +236,7 @@ public: //shuld be protected and friend with sch
 class Scheduler {
 
 
-	void handler (SPSCQueue* queues, Worker* workers) {
+	void handler (SPSCQueue<Car>* queues, Worker* workers) {
 		for(Road r = Road::East; ; r = static_cast<Road>((static_cast<int>(r) + 1) % 4)) {
 			auto cand = queues[static_cast<int>(r)].see(); 
 			if (cand.has_value()){
@@ -237,7 +251,7 @@ class Scheduler {
 public:
 struct SchArgs {
 		Scheduler* sch;
-		SPSCQueue* queues;
+		SPSCQueue<Car>* queues;
 		Worker* workers	;
 	};
 
@@ -252,11 +266,26 @@ struct SchArgs {
 };
 
 
+class Logger {
 
+	time_t start;
+
+
+public:
+
+	Logger() {time(&start);}
+	 std::string log() {
+
+		
+
+
+	}
+};
 
 int main () {
 	Scheduler sch;
-    SPSCQueue queues[4];
+    SPSCQueue<Car> queues[4];
+	SPSCQueue<std::string> logs[7];
     Generator gen(queues);
     pthread_t thread_generator, thread_sch;
 	CrossRoads xroad;
