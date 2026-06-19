@@ -4,7 +4,7 @@ project(RangeSearch VERSION 0.1)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Release)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(
         -fsanitize=address
