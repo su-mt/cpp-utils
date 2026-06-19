@@ -1,3 +1,11 @@
+/*
+This is kdtree impl according to comute geometry by De Berg
+*/
+
+#ifndef KDTREE_KDTREE_HPP_
+#define KDTREE_KDTREE_HPP_
+
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -5,46 +13,14 @@
 #include <tuple>
 #include <vector>
 #include <iostream>
+#include "RangeSearch.hpp"
+
 
 namespace kdtree {
-
-
-    
-
-template <typename T, size_t D>
-struct Point {
-    std::array<T, D> coords;
-
-    T& operator[](std::size_t i) {
-        return coords[i];
-    }
-    const T& operator[](std::size_t i) const {
-        return coords[i];
-    }
-
-    auto operator<=>(const Point&) const = default;
-
-    friend std::ostream& operator<<(std::ostream& os, const Point& pt) {
-        os << '(';
-        for (size_t i = 0; i < D; ++i) {
-            os << pt[i] << (i < D - 1 ? ", " : "");
-        }
-        os << ")";
-        return os;
-    }
-
-};
-
-template <typename T>
-using Point2D = Point<T , 2>;
-
-template <typename T>
-struct Point3D {
-    T x, y, z;
-};
-
 template <typename T, size_t K>
-struct Region{ 
+struct Region : public Range<T,K> { 
+
+    // FIXME: использовать Range
     Point<T,K> start, end;
 
     Region() {
@@ -206,3 +182,6 @@ public:
 }
 
 template class kdtree::KdTree<double, 3>;
+
+
+#endif // KDTREE_KDTREE_HPP_
