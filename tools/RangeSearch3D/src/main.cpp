@@ -2,9 +2,9 @@
 #include <iostream>
 #include <vector>
 #include "kdtree/kdtree.hpp"
-
+#include "RangeSearch.hpp"
 int main() {
-    std::vector<kdtree::Point<double, 3>> points{
+    std::vector<Point<double, 3>> points{
         {{10,10,10}},
         {{20,20,20}},
         {{30,30,30}},

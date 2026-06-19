@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-
+#include "RangeSearch.hpp"
 
 #include "kdtree/kdtree.hpp"
 
@@ -83,7 +83,7 @@ std::vector<Point<double, K>> generate_random_points(int count, const std::array
 // 3. СПЕЦИФИЧНЫЙ ТЕСТ 3D (x: 400-600, y: -60-60, z: 0-45)
 // ==============================================================================
 TEST(KdTreeTest, Specific3DRanges) {
-    const int num_points = 5000;
+    const int num_points = 10000;
     std::array<double, 3> mins = {400.0, -60.0, 0.0};
     std::array<double, 3> maxs = {600.0, 60.0, 45.0};
 
