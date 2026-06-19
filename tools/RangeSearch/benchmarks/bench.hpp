@@ -87,7 +87,56 @@ static void BM_Search(benchmark::State& state) {
     state.counters["found_points"] = static_cast<double>(found);
     state.counters["query_pct"] = state.range(0);
 }
-// ... (весь предыдущий код bench_common.hpp остается без изменений) ...
+
+
+// ============================================================
+// 1. Зависимость времени поиска от количества точек (Vary N)
+// ============================================================
+template <typename TreeType, typename QueryType, typename PointType>
+static void BM_Search_VaryN(benchmark::State& state) {
+    const int n = static_cast<int>(state.range(0));
+    const double frac = 0.10; // Фиксируем размер запроса (например, 10% от всего пространства)
+
+    // Подготовка данных (не входит в замер времени)
+    auto points = make_points<PointType>(n);
+    TreeType tree(points);
+    QueryType query = make_query<QueryType, PointType>(frac);
+
+    size_t found = 0;
+    for (auto _ : state) {
+        auto result = tree.search(query);
+        found = result.size();
+        benchmark::DoNotOptimize(result);
+    }
+
+    state.SetComplexityN(state.range(0));
+    state.counters["n_points"] = n;
+    state.counters["found_points"] = static_cast<double>(found);
+}
+
+// ============================================================
+// 2. Зависимость времени поиска от размера диапазона (Vary Range)
+// ============================================================
+template <typename TreeType, typename QueryType, typename PointType>
+static void BM_Search_VaryRange(benchmark::State& state) {
+    const int n = 100000; // Фиксируем размер дерева (например, 100k точек)
+    const double frac = state.range(0) / 100.0;
+
+    // Подготовка данных (не входит в замер времени)
+    auto points = make_points<PointType>(n);
+    TreeType tree(points);
+    QueryType query = make_query<QueryType, PointType>(frac);
+
+    size_t found = 0;
+    for (auto _ : state) {
+        auto result = tree.search(query);
+        found = result.size();
+        benchmark::DoNotOptimize(result);
+    }
+
+    state.counters["query_pct"] = state.range(0);
+    state.counters["found_points"] = static_cast<double>(found);
+}
 
 // ============================================================
 // ФУНКЦИЯ ДИНАМИЧЕСКОЙ РЕГИСТРАЦИИ
@@ -96,6 +145,8 @@ static void BM_Search(benchmark::State& state) {
 template <typename TreeType, typename QueryType, typename PointType>
 void RegisterSpatialBenchmarks(const std::string& name_prefix) {
     // Регистрируем бенчмарк сборки
+
+
     benchmark::RegisterBenchmark((name_prefix + "_Build").c_str(), BM_Build<TreeType, PointType>)
         ->Arg(1000)
         ->Arg(5000)
@@ -115,7 +166,21 @@ void RegisterSpatialBenchmarks(const std::string& name_prefix) {
         ->Arg(75)
         ->Arg(100)
         ->Unit(benchmark::kMicrosecond);
+
+
+    benchmark::RegisterBenchmark((name_prefix + "_Search_VaryN").c_str(), BM_Search_VaryN<TreeType, QueryType, PointType>)
+        ->RangeMultiplier(2)->Range(1024, 1024 * 1024) // От ~1k до ~1M точек
+        ->Unit(benchmark::kMicrosecond)
+        ->Complexity(benchmark::oLogN); // Ожидаемая сложность поиска в дереве
+
+    benchmark::RegisterBenchmark((name_prefix + "_Search_VaryRange").c_str(), BM_Search_VaryRange<TreeType, QueryType, PointType>)
+        ->DenseRange(5, 100, 5) // Шаг 5%: 5, 10, 15... 100
+        ->Unit(benchmark::kMicrosecond);
+
 }
+
+
+
 
 
 } // namespace bench_utils

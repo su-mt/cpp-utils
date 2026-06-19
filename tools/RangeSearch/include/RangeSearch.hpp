@@ -33,9 +33,6 @@ struct Point {
         os << ")";
         return os;
     }
-
-
-
 };
 
 template <typename T>

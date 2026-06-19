@@ -8,6 +8,13 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON) 
+set(CMAKE_AUTORCC ON) 
+
+# Находим компоненты Qt5
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+
 find_package(Boost REQUIRED)
 
 include(FetchContent)

@@ -1,2 +1,4 @@
 cheatsheet.md
 build/
+.venv
+benchmark_results.json

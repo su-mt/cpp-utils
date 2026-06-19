@@ -18,7 +18,7 @@ This is kdtree impl according to comute geometry by De Berg
 
 namespace kdtree {
 template <typename T, size_t K>
-struct Region : public Range<T,K> { 
+struct Region  { 
 
     // FIXME: использовать Range
     Point<T,K> start, end;

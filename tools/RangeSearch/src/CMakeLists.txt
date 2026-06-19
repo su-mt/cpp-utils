@@ -33,5 +33,7 @@ target_link_libraries(${APP_NAME}
 target_link_directories(${APP_NAME}
     PRIVATE
         Boost::boost
+        Qt5::Core
+        Qt5::Widgets
         .
 )
