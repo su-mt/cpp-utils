@@ -17,4 +17,5 @@ target_include_directories(run_benchmarks
 target_link_libraries(run_benchmarks
     PRIVATE
         benchmark::benchmark
+        Boost::boost
 )

@@ -32,5 +32,6 @@ target_link_libraries(${APP_NAME}
 
 target_link_directories(${APP_NAME}
     PRIVATE
+        Boost::boost
         .
 )
