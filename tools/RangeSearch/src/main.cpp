@@ -1,22 +1,9 @@
-#include <cassert>
-#include <iostream>
-#include <vector>
-#include "kdtree/kdtree.hpp"
-#include "RangeSearch.hpp"
-int main() {
-    std::vector<Point<double, 3>> points{
-        {{10,10,10}},
-        {{20,20,20}},
-        {{30,30,30}},
-        {{40,40,40}}
-    };
+#include "gui.hpp"
+#include <QApplication>
 
-    kdtree::KdTree<double, 3> kd(points);
-
-    auto ans = kd.search({
-        {15,15,15},
-        {35,35,35}
-    });
-
-    return 0;
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    rsgui::RangeSearchGUI w;
+    w.show();
+    return app.exec();
 }
