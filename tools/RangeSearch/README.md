@@ -130,4 +130,7 @@ CPU Time, затраченное на аллокацию и сборку стр�
 | **Range Tree** | 0.055 us | 3.23 us | 36.8 us |
 
 
+### 3. Графики
 
+![](analysis/plots/search_vs_n.png)
+![](analysis/plots/search_vs_range.png)
