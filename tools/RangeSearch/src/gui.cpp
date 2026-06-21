@@ -100,7 +100,7 @@ void RangeSearchGUI::runBenchmarks() {
     QThread* t = QThread::create([]() {
         QString dir = "build/src/RangeSearch";
         system(QString("cd %1 && python3 -m venv venv 2>/dev/null").arg(dir).toStdString().c_str());
-        system(QString("cd %1 && source venv/bin/activate && pip install matplotlib numpy -q 2>/dev/null").arg(dir).toStdString().c_str());
+        system(QString("cd %1 && source venv/bin/activate && pip install matplotlib scipy numpy -q 2>/dev/null").arg(dir).toStdString().c_str());
         system(QString("cd %1 && ./build/benchmarks/run_benchmarks --benchmark_format=json --benchmark_out=benchmark_results.json --findvary").arg(dir).toStdString().c_str());
         system(QString("cd %1 && source venv/bin/activate && python analysis/analyze.py").arg(dir).toStdString().c_str());
     });

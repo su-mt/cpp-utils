@@ -20,7 +20,7 @@
 * **Компилятор:** C++23
 * **Зависимости C++:** Boost, Qt5
 * **Тестирование и бенчмарки:** Google Test (gtest), Google Benchmark (gbench)
-* **Анализ данных:** Python3 (с пакетами `numpy` и `matplotlib`)
+* **Анализ данных:** Python3 (с пакетами `numpy`, `matplotlib`, `scipy`)
 
 
 
@@ -72,7 +72,7 @@ cmake --build build -jN
 # 2. Настройка Python окружения
 python3 -m venv .venv
 source .venv/bin/activate
-pip install numpy matplotlib
+pip install numpy matplotlib scipy
 
 # 3. Генерация графиков по результатам замеров
 python analysis/analyze.py
